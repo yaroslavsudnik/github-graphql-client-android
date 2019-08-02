@@ -1,0 +1,194 @@
+File getChangelog() {
+    File file = file('../CHANGELOG.md')
+    if (!file.exists()) {
+        file = new File('./', 'CHANGELOG.md')
+        file.text = changelogTemplate().text
+        file.createNewFile()
+        addChangelog()
+    }
+    file
+}
+
+File changelogTemplate() { file('../changelog_template.txt') }
+
+enum CategoryEnum {
+    feature('Implemented enhancements'),
+    bug('Fixed bugs'),
+    chore('Changed')
+
+    String title
+
+    CategoryEnum(String title) {
+        this.title = title
+    }
+}
+
+static def getLogTitle() {
+    String taskType = getCurrentGitBranch().split('/')[0]
+    try {
+        CategoryEnum.valueOf(CategoryEnum, taskType.toLowerCase()).title
+    } catch (IllegalArgumentException ignored) {
+        ''
+    }
+}
+
+static def addChangelog() {
+    def url = ''
+    def process = "git add ./CHANGELOG.md".execute()
+    process.in.eachLine { line -> url = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    url
+}
+
+static def getRemoteRep() {
+    def url = ''
+    def process = "git config --get remote.origin.url".execute()
+    process.in.eachLine { line -> url = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    url
+}
+
+static def getUsername() {
+    def username = ''
+    def process = 'git config user.name'.execute()
+    process.in.eachLine { line -> username = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    username
+}
+
+static def getCurrentGitBranch() {
+    def branch = ''
+    def process = 'git rev-parse --abbrev-ref HEAD'.execute()
+    process.in.eachLine { line -> branch = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    branch
+}
+
+private static String getTaskNumber() {
+    (getCurrentGitBranch() =~ /#\d+/)[0].toString()
+}
+
+private static String getTaskLink() {
+    String url = (getRemoteRep() =~ /.+(?=.git)/)[0].toString()
+    "[`${getTaskNumber()}`]($url/issues/${getTaskNumber().substring(1)})"
+}
+
+private static String getTaskName() {
+    String result = (getCurrentGitBranch() =~ /(?<=\\/).+(?=-#)/)[0].toString()
+    result = result.replaceAll('-', ' ')
+    result = result.substring(0, 1).toUpperCase() + result.substring(1)
+    result
+}
+
+private static String getLogText() { "${getTaskLink()} ${getTaskName()} (${getUsername()})" }
+
+private boolean taskAlreadyAdd() {
+    getChangelog().text.contains(getLogText())
+}
+
+private boolean categoryIsEmpty(String categoryName) {
+    String result = ''
+    File file = getChangelog()
+    file.readLines().eachWithIndex { String s, int i ->
+        if (s == "\u002A\u002A$categoryName\u002A\u002A") {
+            if (!result) {
+                result = file.readLines().get(i + 1).isEmpty()
+            }
+        }
+    }
+    if (!result) {
+        result = 'true'
+    }
+    return result.toBoolean()
+}
+
+private String textForReplace(String categoryName) {
+    String result = ''
+    String string = (getChangelog().text =~ /\**$categoryName\**(\n-\s.+)+/)[0][0]
+    string.readLines().eachWithIndex { String entry, int i ->
+        if (i != 0) {
+            result += "$entry\n"
+        }
+    }
+    result
+}
+
+private boolean logAdded() {
+    String result = ''
+
+    String category = "${getLogTitle()}:"
+    if (category == ':') {
+        if (!result) {
+            result = 'false'
+        }
+    } else {
+        File file = getChangelog()
+        String changelog
+        if (taskAlreadyAdd()) {
+            if (!result) {
+                result = 'false'
+            }
+        } else {
+            if (categoryIsEmpty(category)) {
+                changelog = file.text.replaceFirst(
+                        "\\u002A\u002A${category}\\u002A\u002A",
+                        "**$category**\n- ${getLogText()}")
+            } else {
+                String string = textForReplace(category)
+                changelog = file.text.replace(string, "${string}- ${getLogText()}\n")
+            }
+            file.text = changelog
+
+            if (!result) {
+                result = 'true'
+            }
+        }
+    }
+    return result.toBoolean()
+}
+
+private void commit() {
+    Process createCommit = ['git', 'commit', "-am Update changelog (${getTaskNumber()})"]
+            .execute(null, project.rootDir)
+    createCommit.waitForProcessOutput(System.out, System.err)
+}
+
+private String deleteEmptyFields(String changelog) {
+    CategoryEnum.values().each {
+        changelog = changelog.replace("\n**${it.title}:**\n\n", '')
+    }
+    changelog
+}
+
+task changelogAlpha {
+    group = 'Changelog'
+    description = 'Update changelog for Alpha deploy'
+
+    doLast {
+        if (logAdded()) {
+            commit()
+        }
+    }
+}
+
+task changelogBeta {
+    group = 'Changelog'
+    description = 'Update changelog for Beta deploy'
+
+    doLast {
+        getChangelog().text = deleteEmptyFields(getChangelog().text)
+    }
+}
+
+task changelogHotfix {
+    group = 'Changelog'
+    description = 'Update changelog for Hotfix deploy'
+
+    doLast {
+        getChangelog().text = deleteEmptyFields(getChangelog().text)
+    }
+}

@@ -1,0 +1,134 @@
+version: 2
+references:
+
+  cache_key: &cache_key
+    key: cache-v1-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+  restore_cache: &restore_cache
+    restore_cache:
+      <<: *cache_key
+  save_cache: &save_cache
+    save_cache:
+      <<: *cache_key
+      paths:
+        - ~/.gradle
+        - ~/.m2
+
+  workspace: &workspace
+               ~/workspace
+  attach_release_workspace: &attach_release_workspace
+    attach_workspace:
+      at: *workspace
+  persist_release_workspace: &persist_release_workspace
+    persist_to_workspace:
+      root: *workspace
+      paths:
+        - .
+
+  android_config: &android_config
+    working_directory: *workspace
+    docker:
+      - image: circleci/android:api-28
+    dependencies:
+      pre:
+        - echo y | android update sdk --no-ui --all --filter "tools"
+        - echo y | android update sdk --no-ui --all --filter "build-tools-23.0.2"
+    environment:
+      TERM: dumb
+      _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
+
+jobs:
+  build:
+    <<: *android_config
+    steps:
+      - checkout
+      - *restore_cache
+      - run:
+          name: chmod permissions
+          command: chmod +x ./gradlew
+      - run:
+          name: Download dependencies
+          command: ./gradlew androidDependencies
+      - *save_cache
+      - run:
+          name: Gradle build (release)
+          command: ./gradlew assembleRelease
+      - *persist_release_workspace
+      - store_artifacts:
+          path: build/.nosync/outputs/apk/
+          destination: /apk/
+      - store_artifacts:
+          path: build/.nosync/outputs/mapping/
+          destination: /mapping/
+
+  deploy_alpha:
+    <<: *android_config
+    steps:
+      - *attach_release_workspace
+      - *restore_cache
+      - run:
+          name: Install fastlane
+          command: bundle install
+      - run:
+          name: Store the google play key
+          command: echo $GOOGLE_PLAY_KEY > gplay_key.json
+      - run:
+          name: Init fastlane supply
+          command: bundle exec fastlane supply init
+      - run:
+          name: chmod permissions
+          command: chmod +x ./.circleci/download_signing_data.sh
+      - run:
+          name: Download signing's data
+          command: ./.circleci/download_signing_data.sh
+      - run:
+          name: Deploy the app to the alpha track
+          command: bundle exec fastlane deploy_alpha
+      - *save_cache
+
+  deploy_beta:
+    <<: *android_config
+    steps:
+      - *attach_release_workspace
+      - *restore_cache
+      - run:
+          name: Install fastlane
+          command: bundle install
+      - run:
+          name: Store the google play key
+          command: echo $GOOGLE_PLAY_KEY > gplay_key.json
+      - run:
+          name: Init fastlane supply
+          command: bundle exec fastlane supply init
+      - run:
+          name: Download signing's data
+          command: ./.circleci/download_signing_data.sh
+      - run:
+          name: Deploy the app to the beta track
+          command: bundle exec fastlane deploy_beta
+      - *save_cache
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /^.*/
+      - deploy_alpha:
+          filters:
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
+            branches:
+              ignore: /^.*/
+          requires:
+            - build
+      - deploy_beta:
+          filters:
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+$/
+            branches:
+              ignore: /^.*/
+          requires:
+            - build

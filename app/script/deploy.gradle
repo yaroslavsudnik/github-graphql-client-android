@@ -1,0 +1,265 @@
+import java.text.SimpleDateFormat
+
+apply from: './script/changelog.gradle'
+
+File getChangelog() {
+    File file = file('../CHANGELOG.md')
+    if (!file.exists()) {
+        file = new File('./', 'CHANGELOG.md')
+        file.text = changelogTemplate().text
+        file.createNewFile()
+    }
+    file
+}
+
+File changelogTemplate() { file('../changelog_template.txt') }
+
+String getVersionName() { getVersionProps()['nameVersion'] }
+
+def getVersionProps() {
+    def versionPropsFile = file('gradle.properties')
+    def versionProps = new Properties()
+    versionProps.load(new FileInputStream(versionPropsFile))
+    return versionProps
+}
+
+def getVersionNameMajor = { (getVersionName() =~ /\d+/)[0].toInteger() }
+
+def getVersionNameMinor = { (getVersionName() =~ /\d+/)[1].toInteger() }
+
+def getVersionNamePatch = { (getVersionName() =~ /\d+/)[2].toInteger() }
+
+def getVersionNameDev = {
+    try {
+        (getVersionName() =~ /\d+/)[3].toInteger()
+    } catch (IndexOutOfBoundsException ignored) {
+        0
+    }
+}
+
+static def getCurrentGitBranch() {
+    def branch = ""
+    def process = "git rev-parse --abbrev-ref HEAD".execute()
+    process.in.eachLine { line -> branch = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    return branch
+}
+
+static def getIssueId(branchName) {
+    try {
+        "\n\n${(branchName =~ /#\d+\u0024/)[0].toString()}"
+    } catch (IndexOutOfBoundsException ignored) {
+        ""
+    }
+}
+
+static def makeVersionName(major, minor, patch, dev) {
+    "v$major.$minor.$patch$dev".toString().trim()
+}
+
+static def getRemoteRep() {
+    def url = ''
+    def process = "git config --get remote.origin.url".execute()
+    process.in.eachLine { line -> url = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    (url =~ /.+(?=.git)/)[0].toString()
+}
+
+private void increaseAndSave(versionName) {
+    gitPull()
+    def versionCode = getVersionProps()['codeVersion'].toInteger() + 1
+    save(versionName, versionCode.toString())
+}
+
+private void save(versionName, versionCode) {
+    def versionProps = getVersionProps()
+    versionProps['nameVersion'] = versionName
+    versionProps['codeVersion'] = versionCode
+    versionProps.store(file('gradle.properties').newWriter(), null)
+}
+
+private void gitPull() {
+    Process pull = ['git', 'pull'].execute(null, project.rootDir)
+    pull.waitForProcessOutput(System.out, System.err)
+}
+
+private void checkoutToDevelop() {
+    Process checkoutDevelop = ['git', 'checkout', "develop"].execute(null, project.rootDir)
+    checkoutDevelop.waitForProcessOutput(System.out, System.err)
+    gitPull()
+}
+
+private String replaceReleaseTitle(String changelog, String versionName) {
+    String date = new SimpleDateFormat("yyyy-MM-dd")
+            .format(new Date(System.currentTimeMillis()))
+    changelog.replaceFirst(
+            '## Unreleased',
+            "## [$versionName]($remoteRep/releases/tag/$versionName) ($date)"
+    )
+}
+
+private String replaceFullChangelog(String changelog, String compareFrom, String compareTo) {
+    String changelogTitle = getCurrentGitBranch().split('/')[0] == 'hotfix' ?
+            'Hotfix\'s changes' : 'Added to this version'
+    if (changelog.contains("compare/$compareFrom...")) {
+        changelog.replaceFirst(
+                "compare/$compareFrom...${getVersionName()}",
+                "compare/$compareFrom...$compareTo"
+        )
+    } else {
+        changelog.replaceFirst(
+                'Added to this version',
+                "[`$changelogTitle`]($remoteRep/compare/$compareFrom...$compareTo)"
+        )
+    }
+}
+
+private String addUnreleasedTemplate(String changelog) {
+    changelog.replaceFirst(
+            '# Changelog',
+            file('../changelog_template.txt').text
+    )
+}
+
+private void checkoutRCBranch(version) {
+    def newBranchName = "$version-rc"
+    Process checkoutRC = ['git', 'checkout', "-b", newBranchName].execute(null, project.rootDir)
+    checkoutRC.waitForProcessOutput(System.out, System.err)
+
+    if (getCurrentGitBranch() != newBranchName) {
+        throw new GradleException("Branch not created. New branch must be $newBranchName")
+    }
+}
+
+private def getFirstCommit() {
+    def commit = ''
+    def process = 'git rev-list --max-parents=0 HEAD'.execute()
+    process.in.eachLine { line -> commit = line }
+    process.err.eachLine { line -> println line }
+    process.waitFor()
+    commit
+}
+
+private void commit() {
+    def version = getVersionProps()['nameVersion']
+    def currentBranch = getCurrentGitBranch()
+    def issueId = getIssueId(currentBranch)
+
+    Process createCommit = ['git', 'commit', "-am Increase app version ($version)$issueId"]
+            .execute(null, project.rootDir)
+    createCommit.waitForProcessOutput(System.out, System.err)
+
+    gitTags()
+}
+
+private void modifyChangelog(curVersionName, nextVersionName) {
+    String changelog = replaceReleaseTitle(getChangelog().text, nextVersionName)
+
+    curVersionName = changelog.contains("## [$curVersionName]") ? curVersionName : getFirstCommit()
+
+    changelog = replaceFullChangelog(changelog, curVersionName, nextVersionName)
+    changelog = addUnreleasedTemplate(changelog)
+    getChangelog().text = changelog
+}
+
+private void makeHotfixChangelog(curVersionName, nextVersionName) {
+    String changelog = replaceReleaseTitle(getChangelog().text, nextVersionName)
+
+    curVersionName = changelog.contains("## [$curVersionName]") ? curVersionName : getFirstCommit()
+
+    changelog = replaceFullChangelog(changelog, curVersionName, nextVersionName)
+    changelog = changelog.replaceFirst(
+            '\n### Milestone name\n',
+            ''
+    )
+    changelog = addUnreleasedTemplate(changelog)
+    getChangelog().text = changelog
+}
+
+private void commitChangelog(version) {
+    Process createCommit = ['git', 'commit', "-am Update changelog ($version)"]
+            .execute(null, project.rootDir)
+    createCommit.waitForProcessOutput(System.out, System.err)
+}
+
+private void gitTags() {
+    def version = getVersionProps()['nameVersion']
+    def currentBranch = getCurrentGitBranch()
+
+    Process createTag = ['git', 'tag', "$version".toString()].execute(null, project.rootDir)
+    createTag.waitForProcessOutput(System.out, System.err)
+
+    Process pushTags = ['git', 'push', "--tags"].execute(null, project.rootDir)
+    pushTags.waitForProcessOutput(System.out, System.err)
+
+    Process pushCommit = ['git', 'push', "origin", "$currentBranch"]
+            .execute(null, project.rootDir)
+    pushCommit.waitForProcessOutput(System.out, System.err)
+}
+
+task deployAlpha {
+    group = 'Deploy'
+    description = 'Increase dev version for alpha build'
+
+    dependsOn changelogAlpha
+    doLast {
+        def curVersionName = makeVersionName(getVersionNameMajor(), getVersionNameMinor(), 0, "")
+        def nextVersionName = makeVersionName(getVersionNameMajor(), getVersionNameMinor() + 1,
+                getVersionNamePatch(), '-dev1')
+        if (getVersionName().toString().contains('-dev')) {
+            curVersionName = makeVersionName(getVersionNameMajor(), getVersionNameMinor() - 1, 0,
+                    "")
+            nextVersionName = makeVersionName(getVersionNameMajor(), getVersionNameMinor(),
+                    getVersionNamePatch(), "-dev${getVersionNameDev() + 1}")
+        }
+
+        getChangelog().text = replaceFullChangelog(getChangelog().text, curVersionName,
+                nextVersionName)
+
+        increaseAndSave(nextVersionName)
+        commit()
+    }
+}
+
+task deployBeta {
+    group = 'Deploy'
+    description = 'Increase minor version for beta build'
+
+    dependsOn changelogBeta
+    doLast {
+        checkoutToDevelop()
+
+        def nextVersionName = makeVersionName(getVersionNameMajor(), getVersionNameMinor(), 0, "")
+        checkoutRCBranch(nextVersionName)
+
+        modifyChangelog(
+                makeVersionName(getVersionNameMajor(), getVersionNameMinor() - 1, 0, ""),
+                nextVersionName
+        )
+        commitChangelog(nextVersionName)
+
+        increaseAndSave(nextVersionName)
+        commit()
+    }
+}
+
+task deployHotfix {
+    group = 'Deploy'
+    description = 'Increase patch version for beta build'
+
+    dependsOn changelogHotfix
+    doLast {
+        def nextVersionName = makeVersionName(
+                getVersionNameMajor(), getVersionNameMinor(), getVersionNamePatch() + 1, ""
+        )
+        makeHotfixChangelog(
+                makeVersionName(getVersionNameMajor(), getVersionNameMinor(), 0, ""),
+                nextVersionName
+        )
+
+        increaseAndSave(nextVersionName)
+        commit()
+    }
+}

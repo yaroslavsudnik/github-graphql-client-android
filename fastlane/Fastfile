@@ -1,0 +1,28 @@
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Deploy a new alpha version to the Google Play"
+  lane :deploy_alpha do
+    gradle(task: "clean assembleRelease")
+    upload_to_play_store(
+        apk: 'build/.nosync/outputs/apk/release/app-release.apk',
+        track: 'alpha',
+        skip_upload_images: true
+    )
+  end
+
+  desc "Deploy a new beta version to the Google Play"
+  lane :deploy_beta do
+    gradle(task: "clean assembleRelease")
+    upload_to_play_store(
+        apk: 'build/.nosync/outputs/apk/release/app-release.apk',
+        track: 'beta',
+        skip_upload_images: true
+    )
+  end
+end
