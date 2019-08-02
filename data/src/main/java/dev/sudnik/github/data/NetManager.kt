@@ -1,4 +1,4 @@
-package dev.sudnik.template.data
+package dev.sudnik.github.data
 
 class NetManager(/*private val applicationContext: Context*/) {
     val isConnectedToInternet: Boolean

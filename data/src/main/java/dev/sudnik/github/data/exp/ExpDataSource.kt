@@ -1,4 +1,4 @@
-package dev.sudnik.template.data.exp
+package dev.sudnik.github.data.exp
 
 import dev.sudnik.basecleanandroid.domain.ErrorResponse
 import kotlinx.coroutines.*

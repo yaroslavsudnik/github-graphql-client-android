@@ -1,4 +1,4 @@
-package dev.sudnik.template.main
+package dev.sudnik.github.main
 
 sealed class MainViewState {
     class ShowI(val i: String) : MainViewState()

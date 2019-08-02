@@ -1,8 +1,8 @@
-package dev.sudnik.template.main
+package dev.sudnik.github.main
 
 import dev.sudnik.basecleanandroid.presentation.BaseReducer
-import dev.sudnik.template.domain.interactor.ExpInteractor
-import dev.sudnik.template.domain.state.ExpDataState
+import dev.sudnik.github.domain.interactor.ExpInteractor
+import dev.sudnik.github.domain.state.ExpDataState
 
 class ExpReducer(private val interactor: ExpInteractor) :
         BaseReducer<MainViewState, ExpDataState>(interactor) {

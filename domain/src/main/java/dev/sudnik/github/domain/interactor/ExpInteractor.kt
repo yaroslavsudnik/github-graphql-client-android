@@ -1,10 +1,10 @@
-package dev.sudnik.template.domain.interactor
+package dev.sudnik.github.domain.interactor
 
 import dev.sudnik.basecleanandroid.domain.BaseInteractor
 import dev.sudnik.basecleanandroid.domain.ErrorResponse
-import dev.sudnik.template.domain.entity.ExpEntity
-import dev.sudnik.template.domain.repository.ExpRepository
-import dev.sudnik.template.domain.state.ExpDataState
+import dev.sudnik.github.domain.entity.ExpEntity
+import dev.sudnik.github.domain.repository.ExpRepository
+import dev.sudnik.github.domain.state.ExpDataState
 
 class ExpInteractor(private val repository: ExpRepository) : BaseInteractor<ExpDataState, ExpEntity>() {
 

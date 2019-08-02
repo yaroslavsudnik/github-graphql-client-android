@@ -1,4 +1,4 @@
-package dev.sudnik.template
+package dev.sudnik.github
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

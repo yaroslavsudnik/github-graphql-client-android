@@ -1,4 +1,4 @@
-package dev.sudnik.template.domain.state
+package dev.sudnik.github.domain.state
 
 sealed class ExpDataState {
     class ExpLoaded(val i: String) : ExpDataState() {

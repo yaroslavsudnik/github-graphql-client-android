@@ -1,10 +1,10 @@
-package dev.sudnik.template.main
+package dev.sudnik.github.main
 
 import android.app.Application
 import dev.sudnik.basecleanandroid.presentation.BaseReducer
 import dev.sudnik.basecleanandroid.presentation.BaseViewModel
-import dev.sudnik.template.data.exp.ExpRepositoryImpl
-import dev.sudnik.template.domain.interactor.ExpInteractor
+import dev.sudnik.github.data.exp.ExpRepositoryImpl
+import dev.sudnik.github.domain.interactor.ExpInteractor
 
 class MainViewModel(application: Application) : BaseViewModel<MainViewState>(application) {
 

@@ -7,11 +7,11 @@ def props = new Properties()
 file("../signing.properties").withInputStream { props.load(it) }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
-        applicationId "dev.sudnik.template"
+        applicationId "dev.sudnik.github"
         minSdkVersion 17
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode codeVersion.toInteger()
         versionName nameVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

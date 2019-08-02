@@ -1,9 +1,9 @@
-package dev.sudnik.template.data.exp
+package dev.sudnik.github.data.exp
 
 import dev.sudnik.basecleanandroid.domain.ErrorResponse
 import dev.sudnik.basecleanandroid.domain.OnCallback
-import dev.sudnik.template.domain.entity.ExpEntity
-import dev.sudnik.template.domain.repository.ExpRepository
+import dev.sudnik.github.domain.entity.ExpEntity
+import dev.sudnik.github.domain.repository.ExpRepository
 
 class ExpRepositoryImpl : ExpRepository {
 

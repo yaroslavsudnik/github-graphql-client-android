@@ -1,9 +1,9 @@
-package dev.sudnik.template.main
+package dev.sudnik.github.main
 
 import android.os.Bundle
 import android.view.View
 import dev.sudnik.basecleanandroid.presentation.BaseActivity
-import dev.sudnik.template.R
+import dev.sudnik.github.R
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainViewState, MainViewModel>() {
