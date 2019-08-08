@@ -4,21 +4,33 @@ import dev.sudnik.basecleanandroid.domain.ErrorResponse
 import dev.sudnik.basecleanandroid.domain.OnCallback
 import dev.sudnik.github.domain.entity.ExpEntity
 import dev.sudnik.github.domain.repository.ExpRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ExpRepositoryImpl : ExpRepository {
+class ExpRepositoryImpl(githubToken: String) : ExpRepository {
 
-    private val expDataSource = ExpDataSource()
+    private val expDataSource = ExpDataSource(githubToken)
     private val expMapper = ExpMapper()
 
     override fun getExp(callback: OnCallback<ExpEntity>) {
         expDataSource.getExp(object : ExpDataSource.OnExpReadyCallback {
             override fun onExpReady(dto: ExpDTO) {
-                val exp = expMapper.transformToExp(dto)
-                callback.onSuccess(ExpEntity(exp))
+                GlobalScope.launch {
+                    val exp = expMapper.transformToExp(dto)
+                    withContext(Dispatchers.Main) {
+                        callback.onSuccess(ExpEntity(exp))
+                    }
+                }
             }
 
             override fun onError(error: ErrorResponse) {
-                callback.onError(error)
+                GlobalScope.launch {
+                    withContext(Dispatchers.Main) {
+                        callback.onError(error)
+                    }
+                }
             }
         })
     }

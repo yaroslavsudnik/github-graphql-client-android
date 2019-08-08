@@ -3,6 +3,7 @@ package dev.sudnik.github.main
 import android.app.Application
 import dev.sudnik.basecleanandroid.presentation.BaseReducer
 import dev.sudnik.basecleanandroid.presentation.BaseViewModel
+import dev.sudnik.github.BuildConfig
 import dev.sudnik.github.data.exp.ExpRepositoryImpl
 import dev.sudnik.github.domain.interactor.ExpInteractor
 
@@ -11,7 +12,7 @@ class MainViewModel(application: Application) : BaseViewModel<MainViewState>(app
     private lateinit var expReducer: ExpReducer
 
     override fun instanceReducers(): ArrayList<BaseReducer<MainViewState, out Any>> {
-        expReducer = ExpReducer(ExpInteractor(ExpRepositoryImpl()))
+        expReducer = ExpReducer(ExpInteractor(ExpRepositoryImpl(BuildConfig.github_token)))
         return arrayListOf(expReducer)
     }
 
