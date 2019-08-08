@@ -49,7 +49,7 @@ jobs:
           command: chmod +x ./gradlew
       - run:
           name: test environment
-          command: echo $github_token
+          command: echo $github_token > github_token
       - run:
           name: Download dependencies
           command: ./gradlew androidDependencies
