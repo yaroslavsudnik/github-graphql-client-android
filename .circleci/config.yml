@@ -48,6 +48,9 @@ jobs:
           name: chmod permissions
           command: chmod +x ./gradlew
       - run:
+          name: test environment
+          command: echo $github_token
+      - run:
           name: Download dependencies
           command: ./gradlew androidDependencies
       - *save_cache
