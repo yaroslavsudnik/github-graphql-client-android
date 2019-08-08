@@ -1,3 +1,4 @@
+#!/bin/bash
 function copyEnvVarsToGradleProperties {
     GRADLE_PROPERTIES=$HOME"/.gradle/gradle.properties"
     export GRADLE_PROPERTIES
