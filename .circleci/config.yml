@@ -32,7 +32,6 @@ references:
       pre:
         - echo y | android update sdk --no-ui --all --filter "tools"
         - echo y | android update sdk --no-ui --all --filter "build-tools-23.0.2"
-        - source environmentSetup.sh && copyEnvVarsToGradleProperties
       environment:
       TERM: dumb
       _JAVA_OPTIONS: "-Xmx2048m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"

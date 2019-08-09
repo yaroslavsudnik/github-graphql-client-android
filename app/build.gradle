@@ -15,7 +15,6 @@ android {
         versionCode codeVersion.toInteger()
         versionName nameVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "github_token", github_token
     }
     signingConfigs {
         release {

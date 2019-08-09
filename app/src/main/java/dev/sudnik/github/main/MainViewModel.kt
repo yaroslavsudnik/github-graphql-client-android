@@ -12,7 +12,7 @@ class MainViewModel(application: Application) : BaseViewModel<MainViewState>(app
     private lateinit var expReducer: ExpReducer
 
     override fun instanceReducers(): ArrayList<BaseReducer<MainViewState, out Any>> {
-        expReducer = ExpReducer(ExpInteractor(ExpRepositoryImpl(BuildConfig.github_token)))
+        expReducer = ExpReducer(ExpInteractor(ExpRepositoryImpl()))
         return arrayListOf(expReducer)
     }
 

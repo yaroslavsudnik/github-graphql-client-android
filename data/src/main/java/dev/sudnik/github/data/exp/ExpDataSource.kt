@@ -14,7 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import java.util.concurrent.TimeUnit
 
-class ExpDataSource(private val githubToken: String) {
+class ExpDataSource {
     private var viewModelJob = Job()
     private val viewModelScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
@@ -27,7 +27,7 @@ class ExpDataSource(private val githubToken: String) {
     private fun testQuery(callback: OnExpReadyCallback) {
         val request = TestQuery
                 .builder()
-                .owner("octocatt")
+                .owner("octocat")
                 .name("Hello-World")
                 .build()
         apolloClient.query(request).enqueue(object : ApolloCall.Callback<TestQuery.Data>() {
@@ -46,35 +46,35 @@ class ExpDataSource(private val githubToken: String) {
         })
     }
 
-    private val httpClient: OkHttpClient by lazy {
-        OkHttpClient.Builder()
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .addNetworkInterceptor(NetworkInterceptor(githubToken))
-            .build()
-    }
-
-    private val apolloClient: ApolloClient by lazy {
-        ApolloClient.builder()
-            .serverUrl(GITHUB_GRAPHQL_ENDPOINT)
-            .okHttpClient(httpClient)
-            .build()
-    }
-
     companion object {
 
         private const val GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
 
-        private class NetworkInterceptor(val githubToken: String) : Interceptor {
+        private class NetworkInterceptor : Interceptor {
 
             override fun intercept(chain: Interceptor.Chain?): Response {
                 return chain!!.proceed(
                         chain.request().newBuilder().header(
                                 "Authorization",
-                                "Bearer $githubToken"
+                                "Bearer fd37082aceffcaa81fdb334ee44697471338c21d"
                         ).build()
                 )
             }
+        }
+
+        private val httpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .addNetworkInterceptor(NetworkInterceptor())
+                .build()
+        }
+
+        private val apolloClient: ApolloClient by lazy {
+            ApolloClient.builder()
+                .serverUrl(GITHUB_GRAPHQL_ENDPOINT)
+                .okHttpClient(httpClient)
+                .build()
         }
 
     }

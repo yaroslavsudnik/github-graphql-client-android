@@ -9,9 +9,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ExpRepositoryImpl(githubToken: String) : ExpRepository {
+class ExpRepositoryImpl : ExpRepository {
 
-    private val expDataSource = ExpDataSource(githubToken)
+    private val expDataSource = ExpDataSource()
     private val expMapper = ExpMapper()
 
     override fun getExp(callback: OnCallback<ExpEntity>) {
