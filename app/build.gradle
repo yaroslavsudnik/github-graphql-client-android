@@ -31,8 +31,15 @@ android {
             signingConfig signingConfigs.release
         }
     }
-    allprojects {
-        buildDir = '../build/.nosync'
+    applicationVariants.all { variant ->
+        variant.assembleProvider.configure { assemble ->
+            assemble.doLast {
+                copy {
+                    from variant.outputs*.outputFile
+                    into "../build/.nosync/outputs/apk/${variant.dirName}"
+                }
+            }
+        }
     }
     packagingOptions {
         exclude 'META-INF/domain.kotlin_module'

@@ -3,6 +3,7 @@ package dev.sudnik.github.main
 import android.app.Application
 import dev.sudnik.basecleanandroid.presentation.BaseReducer
 import dev.sudnik.basecleanandroid.presentation.BaseViewModel
+import dev.sudnik.github.BuildConfig
 import dev.sudnik.github.data.exp.ExpRepositoryImpl
 import dev.sudnik.github.domain.interactor.ExpInteractor
 
