@@ -147,7 +147,7 @@ private void commit() {
     def currentBranch = getCurrentGitBranch()
     def issueId = getIssueId(currentBranch)
 
-    Process createCommit = ['git', 'commit', "-am Increase app version ($version)$issueId"]
+    Process createCommit = ['git', 'commit', "-am Increase app version ($version)$issueId  [ci skip]"]
             .execute(null, project.rootDir)
     createCommit.waitForProcessOutput(System.out, System.err)
 
