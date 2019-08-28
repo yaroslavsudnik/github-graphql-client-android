@@ -151,7 +151,7 @@ workflows:
               only: /^v.*/
           requires:
             - build
-      - hold:
+      - request_deploy:
           type: approval
           requires:
             - test
@@ -162,7 +162,7 @@ workflows:
             branches:
               ignore: /^.*/
           requires:
-            - hold
+            - request_deploy
 #  deploy_beta:
 #    jobs:
 #      - build:
