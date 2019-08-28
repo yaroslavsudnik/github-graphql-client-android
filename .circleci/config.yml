@@ -151,13 +151,6 @@ workflows:
               only: /^v.*/
           requires:
             - build
-      - request_deploy:
-          type: approval
-          filters:
-            tags:
-              only: /^v.*/
-          requires:
-            - test
       - deploy_alpha:
           filters:
             tags:
@@ -165,30 +158,33 @@ workflows:
             branches:
               ignore: /^.*/
           requires:
+            - test
+  deploy_beta:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /^v.*/
+            tags:
+              only: /^v.*/
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+          requires:
+            - build
+      - request_deploy:
+          type: approval
+          filters:
+            tags:
+              only: /^v.*/
+          requires:
+            - test
+      - deploy_beta:
+          filters:
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+$/
+            branches:
+              ignore: /^.*/
+          requires:
             - request_deploy
-#  deploy_beta:
-#    jobs:
-#      - build:
-#          filters:
-#            branches:
-#              ignore: /^.*/
-#            tags:
-#              only: /^.*/
-#      - test:
-#          filters:
-#            tags:
-#              only: /^.*/
-#          requires:
-#            - build
-#      - hold:
-#          type: approval
-#          requires:
-#            - test
-#      - deploy_beta:
-#          filters:
-#            tags:
-#              only: /^v{0,1}\d+[.]\d+[.]\d+$/
-#            branches:
-#              ignore: /^.*/
-#          requires:
-#            - hold
