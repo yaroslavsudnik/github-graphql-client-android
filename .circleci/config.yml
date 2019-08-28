@@ -61,6 +61,21 @@ jobs:
           path: build/.nosync/outputs/mapping/
           destination: /mapping/
 
+  test:
+    <<: *android_config
+    steps:
+      - *attach_release_workspace
+      - *restore_cache
+      - run:
+          name: Run tests
+          command: ./gradlew test
+      - store_artifacts:
+          path: app/build/reports/tests/
+          destination: /reports/
+      - store_test_results:
+          path: app/build/test-results/
+          destination: /test-results/
+
   deploy_alpha:
     <<: *android_config
     steps:
@@ -113,6 +128,10 @@ workflows:
   workflow:
     jobs:
       - build:
+          filters:
+            tags:
+              only: /^.*/
+      - test:
           filters:
             tags:
               only: /^.*/
