@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 
 class ExpRepositoryImpl : ExpRepository {
 
-    private val expDataSource = ExpDataSource()
+    private val expDataSource = ExpDataSource(GITHUB_GRAPHQL_ENDPOINT)
     private val expMapper = ExpMapper()
 
     override fun getExp(callback: OnCallback<ExpEntity>) {
@@ -33,5 +33,9 @@ class ExpRepositoryImpl : ExpRepository {
                 }
             }
         })
+    }
+
+    companion object {
+        private const val GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql"
     }
 }

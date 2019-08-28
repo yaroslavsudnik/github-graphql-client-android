@@ -61,6 +61,21 @@ jobs:
           path: build/.nosync/outputs/mapping/
           destination: /mapping/
 
+  test:
+    <<: *android_config
+    steps:
+      - *attach_release_workspace
+      - *restore_cache
+      - run:
+          name: Run tests
+          command: ./gradlew test
+      - store_artifacts:
+          path: build/.nosync/reports/tests/
+          destination: /reports/
+      - store_test_results:
+          path: build/.nosync/test-results/
+          destination: /test-results/
+
   deploy_alpha:
     <<: *android_config
     steps:
@@ -110,25 +125,62 @@ jobs:
 
 workflows:
   version: 2
-  workflow:
+  build_test:
     jobs:
       - build:
           filters:
             tags:
-              only: /^.*/
+              ignore: /^v.*/
+      - test:
+          filters:
+            tags:
+              ignore: /^v.*/
+          requires:
+            - build
+  deploy_alpha:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /^.*/
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
+      - test:
+          filters:
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
+          requires:
+            - build
       - deploy_alpha:
           filters:
             tags:
               only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
+          requires:
+            - test
+  deploy_beta:
+    jobs:
+      - build:
+          filters:
             branches:
               ignore: /^.*/
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+$/
+      - test:
+          filters:
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+$/
           requires:
             - build
+      - request_deploy:
+          type: approval
+          filters:
+            tags:
+              only: /^v{0,1}\d+[.]\d+[.]\d+$/
+          requires:
+            - test
       - deploy_beta:
           filters:
             tags:
               only: /^v{0,1}\d+[.]\d+[.]\d+$/
-            branches:
-              ignore: /^.*/
           requires:
-            - build
+            - request_deploy
