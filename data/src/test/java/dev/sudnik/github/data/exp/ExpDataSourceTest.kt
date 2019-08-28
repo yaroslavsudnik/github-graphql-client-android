@@ -69,7 +69,7 @@ class ExpDataSourceTest {
         // Act
         expDataSource.getExp(mockCallback)
 
-//        Thread.sleep(500)
+        Thread.sleep(500)
         // Assert
         verify {
             mockCallback.onExpReady(expectedExpDTO)
