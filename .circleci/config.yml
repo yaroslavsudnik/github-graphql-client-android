@@ -130,7 +130,7 @@ workflows:
       - build:
           filters:
             tags:
-              only: /^.*/
+              ignore: /^.*/
       - test:
           filters:
             tags:
@@ -144,7 +144,6 @@ workflows:
             branches:
               ignore: /^.*/
           requires:
-            - build
             - test
       - deploy_beta:
           filters:
@@ -153,5 +152,4 @@ workflows:
             branches:
               ignore: /^.*/
           requires:
-            - build
             - test
