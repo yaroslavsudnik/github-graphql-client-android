@@ -145,6 +145,7 @@ workflows:
               ignore: /^.*/
           requires:
             - build
+            - test
       - deploy_beta:
           filters:
             tags:
@@ -153,3 +154,4 @@ workflows:
               ignore: /^.*/
           requires:
             - build
+            - test
