@@ -152,7 +152,7 @@ private boolean logAdded() {
 }
 
 private void commit() {
-    Process createCommit = ['git', 'commit', "-am Update changelog (${getTaskNumber()})"]
+    Process createCommit = ['git', 'commit', "-am Update changelog (${getTaskNumber()}) [ci skip]"]
             .execute(null, project.rootDir)
     createCommit.waitForProcessOutput(System.out, System.err)
 }
