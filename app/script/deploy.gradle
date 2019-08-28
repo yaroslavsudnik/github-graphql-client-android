@@ -50,7 +50,7 @@ static def getIssueId(branchName) {
     try {
         "\n\n${(branchName =~ /#\d+\u0024/)[0].toString()}"
     } catch (IndexOutOfBoundsException ignored) {
-        ""
+        "\n"
     }
 }
 

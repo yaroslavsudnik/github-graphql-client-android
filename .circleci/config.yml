@@ -146,15 +146,9 @@ workflows:
             tags:
               only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
       - test:
-          filters:
-            tags:
-              only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
           requires:
             - build
       - deploy_alpha:
-          filters:
-            tags:
-              only: /^v{0,1}\d+[.]\d+[.]\d+[-dev]+\d+/
           requires:
             - test
   deploy_beta:
