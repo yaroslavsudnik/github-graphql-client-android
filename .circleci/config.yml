@@ -163,29 +163,29 @@ workflows:
               ignore: /^.*/
           requires:
             - hold
-  deploy_beta:
-    jobs:
-      - build:
-          filters:
-            branches:
-              ignore: /^.*/
-            tags:
-              only: /^.*/
-      - test:
-          filters:
-            tags:
-              only: /^.*/
-          requires:
-            - build
-      - hold:
-          type: approval
-          requires:
-            - test
-      - deploy_beta:
-          filters:
-            tags:
-              only: /^v{0,1}\d+[.]\d+[.]\d+$/
-            branches:
-              ignore: /^.*/
-          requires:
-            - hold
+#  deploy_beta:
+#    jobs:
+#      - build:
+#          filters:
+#            branches:
+#              ignore: /^.*/
+#            tags:
+#              only: /^.*/
+#      - test:
+#          filters:
+#            tags:
+#              only: /^.*/
+#          requires:
+#            - build
+#      - hold:
+#          type: approval
+#          requires:
+#            - test
+#      - deploy_beta:
+#          filters:
+#            tags:
+#              only: /^v{0,1}\d+[.]\d+[.]\d+$/
+#            branches:
+#              ignore: /^.*/
+#          requires:
+#            - hold
