@@ -153,6 +153,8 @@ workflows:
             - build
       - request_deploy:
           type: approval
+          tags:
+            only: /^v.*/
           requires:
             - test
       - deploy_alpha:
