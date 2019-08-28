@@ -130,11 +130,11 @@ workflows:
       - build:
           filters:
             tags:
-              ignore: /^.*/
+              ignore: /^v.*/
       - test:
           filters:
             tags:
-              ignore: /^.*/
+              ignore: /^v.*/
           requires:
             - build
   deploy_alpha:
@@ -144,11 +144,11 @@ workflows:
             branches:
               ignore: /^.*/
             tags:
-              only: /^.*/
+              only: /^v.*/
       - test:
           filters:
             tags:
-              only: /^.*/
+              only: /^v.*/
           requires:
             - build
       - hold:
