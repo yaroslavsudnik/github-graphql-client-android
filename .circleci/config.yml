@@ -127,6 +127,12 @@ workflows:
   version: 2
   workflow:
     jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /^.*/
+            tags:
+              only: /^.*/
       - test:
           filters:
             tags:
