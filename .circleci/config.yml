@@ -134,7 +134,7 @@ workflows:
       - test:
           filters:
             tags:
-              only: /^.*/
+              ignore: /^.*/
           requires:
             - build
   deploy_alpha:
