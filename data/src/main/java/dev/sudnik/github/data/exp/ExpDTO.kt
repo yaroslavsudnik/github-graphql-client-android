@@ -1,3 +1,3 @@
 package dev.sudnik.github.data.exp
 
-class ExpDTO(val i: Int)
+data class ExpDTO(val i: Int)
