@@ -132,7 +132,7 @@ workflows:
             branches:
               ignore: /^.*/
             tags:
-              only: /^.*/
+              ignore: /^.*/
       - test:
           filters:
             tags:
