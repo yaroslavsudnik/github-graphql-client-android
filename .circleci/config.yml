@@ -70,10 +70,10 @@ jobs:
           name: Run tests
           command: ./gradlew test
       - store_artifacts:
-          path: app/build/reports/tests/
+          path: build/.nosync/reports/tests/
           destination: /reports/
       - store_test_results:
-          path: app/build/test-results/
+          path: build/.nosync/test-results/
           destination: /test-results/
 
   deploy_alpha:
