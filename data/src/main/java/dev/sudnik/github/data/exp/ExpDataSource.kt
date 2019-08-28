@@ -59,6 +59,22 @@ class ExpDataSource(private val baseUrl: String) {
                 ).build()
             )
         }
+
+        private val httpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .addNetworkInterceptor(NetworkInterceptor())
+                .build()
+        }
+
+        private val apolloClient: ApolloClient by lazy {
+            ApolloClient.builder()
+                .serverUrl(GITHUB_GRAPHQL_ENDPOINT)
+                .okHttpClient(httpClient)
+                .build()
+        }
+
     }
 
     private val httpClient: OkHttpClient by lazy {
