@@ -128,9 +128,6 @@ workflows:
   workflow:
     jobs:
       - build:
-          filters:
-            tags:
-              ignore: /^.*/
       - test:
           filters:
             tags:
