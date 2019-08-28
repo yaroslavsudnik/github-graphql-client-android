@@ -135,6 +135,8 @@ workflows:
           filters:
             tags:
               only: /^.*/
+          requires:
+            - build
       - deploy_alpha:
           filters:
             tags:
