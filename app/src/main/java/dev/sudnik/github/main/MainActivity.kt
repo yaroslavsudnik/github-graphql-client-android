@@ -1,5 +1,6 @@
 package dev.sudnik.github.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import dev.sudnik.basecleanandroid.presentation.BaseActivity
@@ -12,6 +13,7 @@ class MainActivity : BaseActivity<MainViewState, MainViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        startActivity(Intent(this, OAuthActivity::class.java))
         bt.setOnClickListener { goClick() }
     }
 
