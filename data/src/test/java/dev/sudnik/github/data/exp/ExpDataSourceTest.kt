@@ -1,17 +1,11 @@
 package dev.sudnik.github.data.exp
 
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Before
 
 class ExpDataSourceTest {
 
+/*
     val mockServer = MockWebServer()
     val mainThreadSurrogate = newSingleThreadContext("UI thread")
 
@@ -75,5 +69,6 @@ class ExpDataSourceTest {
             mockCallback.onExpReady(expectedExpDTO)
         }
     }
+*/
 
 }

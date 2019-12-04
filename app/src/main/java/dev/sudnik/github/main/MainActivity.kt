@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import dev.sudnik.basecleanandroid.presentation.BaseActivity
 import dev.sudnik.github.R
+import dev.sudnik.github.login.LoginActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : BaseActivity<MainViewState, MainViewModel>() {
@@ -13,7 +14,7 @@ class MainActivity : BaseActivity<MainViewState, MainViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startActivity(Intent(this, OAuthActivity::class.java))
+        startActivity(Intent(this, LoginActivity::class.java))
         bt.setOnClickListener { goClick() }
     }
 
@@ -31,7 +32,7 @@ class MainActivity : BaseActivity<MainViewState, MainViewModel>() {
 
     private fun goClick() {
         showLoading()
-        baseViewModel.getExp()
+//        baseViewModel.getExp()
     }
 
     override fun showLoading() {

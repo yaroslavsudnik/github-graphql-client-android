@@ -43,6 +43,7 @@ android {
     }
     packagingOptions {
         exclude 'META-INF/domain.kotlin_module'
+        exclude 'META-INF/data.kotlin_module'
     }
 }
 
@@ -58,7 +59,6 @@ dependencies {
     implementation project(path: ':data')
     implementation "com.github.yaroslavsudnik.base-clean-android:presentation:$base_library_version"
 
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
@@ -70,6 +70,7 @@ dependencies {
     ktlint "com.github.shyiko:ktlint:0.30.0"
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'io.mockk:mockk:1.9.3'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
