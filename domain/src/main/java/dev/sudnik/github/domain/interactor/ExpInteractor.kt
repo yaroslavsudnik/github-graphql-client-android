@@ -2,19 +2,21 @@ package dev.sudnik.github.domain.interactor
 
 import dev.sudnik.basecleanandroid.domain.BaseInteractor
 import dev.sudnik.basecleanandroid.domain.ErrorResponse
-import dev.sudnik.github.domain.entity.ExpEntity
-import dev.sudnik.github.domain.repository.ExpRepository
+import dev.sudnik.github.data.exp.ExpEntity
+import dev.sudnik.github.data.exp.ExpRepository
+import dev.sudnik.github.data.exp.ExpRepositoryImpl
 import dev.sudnik.github.domain.state.ExpDataState
 
-class ExpInteractor(private val repository: ExpRepository) : BaseInteractor<ExpDataState, ExpEntity>() {
+class ExpInteractor : BaseInteractor<ExpDataState, ExpEntity>() {
+
+    private val repository: ExpRepository = ExpRepositoryImpl()
 
     fun getExp() = call(ExpDataState.ExpLoaded.create()) { repository.getExp(it) }
 
-    override fun processSuccessState(clazz: ExpDataState, data: ExpEntity):
-            ExpDataState = when (clazz) {
+    override fun processSuccessState(clazz: ExpDataState, data: ExpEntity): ExpDataState = when (clazz) {
         is ExpDataState.ExpLoaded -> ExpDataState.ExpLoaded(data.getExpValue())
         else -> throw IllegalArgumentException(
-                "State object $clazz has not been determined"
+            "State object $clazz has not been determined"
         )
     }
 
