@@ -4,8 +4,9 @@ import dev.sudnik.basecleanandroid.presentation.BaseReducer
 import dev.sudnik.github.domain.interactor.ExpInteractor
 import dev.sudnik.github.domain.state.ExpDataState
 
-class ExpReducer(private val interactor: ExpInteractor) :
-        BaseReducer<MainViewState, ExpDataState>(interactor) {
+class ExpReducer : BaseReducer<MainViewState, ExpDataState>() {
+
+    override fun instanceInteractor() = ExpInteractor()
 
     override fun processDataState(data: ExpDataState): MainViewState = when (data) {
         is ExpDataState.ExpLoaded -> MainViewState.ShowI(data.i)
@@ -19,5 +20,5 @@ class ExpReducer(private val interactor: ExpInteractor) :
 
     override fun unknownError(): MainViewState = MainViewState.OnError("author name loading error")
 
-    fun getExp() = interactor.getExp()
+    fun getExp() = (interactor as ExpInteractor).getExp()
 }
